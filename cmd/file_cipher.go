@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 const READ_SIZE = 12800
@@ -48,6 +49,7 @@ func cipherFile(fileName string, key, nonce []byte) {
 	block_t := chacha.Block_t{}
 	chacha.InitBlock(&block_t, key, nonce)
 
+	start := time.Now()
 	for {
 		n, err := inputFile.Read(plainText)
 
@@ -65,5 +67,16 @@ func cipherFile(fileName string, key, nonce []byte) {
 		}
 
 	}
+	end := time.Now()
 
+	fileStat, err := inputFile.Stat()
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fileLength := float64(fileStat.Size()) / (1024.0 * 1024.0)
+		totalTime := float64(end.Sub(start)) / float64(time.Second)
+
+		fmt.Printf("Time taken %0.2f seconds, file length %0.2f MB\n", totalTime, fileLength)
+		fmt.Printf("Average time %0.2f MB/s \n", fileLength/totalTime)
+	}
 }
